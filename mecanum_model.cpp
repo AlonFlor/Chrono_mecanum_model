@@ -301,10 +301,16 @@ int main(int argc, char* argv[]) {
 
     //SET SPEEDS
     //FL,BR,BL,FR
-    double speed_FL = 1;
-    double speed_BR = 1;
-    double speed_BL = 1;
-    double speed_FR = 1;
+    double speed_FL = 5;
+    double speed_BR = 2;
+    double speed_BL = 5;
+    double speed_FR = 2;
+    
+    //print data
+    int frame_number=0;
+    //FILE * datafile = fopen("trajectory.csv","w");
+    FILE * datafile_hr = fopen("trajectory_human_readable.csv","w");
+    fprintf(datafile_hr,"frame number, x, y, z, q0, q1, q2, q3, v_BR, v_BL, v_FR, v_FL\n");
 
     application.SetTimestep(0.01);
     application.SetTryRealtime(true);
@@ -324,11 +330,20 @@ int main(int argc, char* argv[]) {
         double wheel_D_rotspeed = speed_FR;												//Front right
 
         //output data
+        frame_number+=1;
         ChVector<> pos = mTrussPlatform->GetPos();
         ChQuaternion<> rot = mTrussPlatform->GetRot();
         printf("Position: %f %f %f\n",pos.x(),pos.y(),pos.z());
         printf("Rotation: %f %f %f %f\n",rot.e0(),rot.e1(),rot.e2(),rot.e3());
-        printf("Speeds: BR: %f\tBL: %f\tFR:  %f\tFL: %f\n",wheel_B_rotspeed,wheel_C_rotspeed,wheel_D_rotspeed,wheel_A_rotspeed);
+        printf("Speeds: BR: %f\tBL: %f\tFR:  %f\tFL: %f\n",speed_BR,speed_BL,speed_FR,speed_FL);
+        /*fprintf(datafile,"%d,%a,%a,%a,%a,%a,%a,%a,%a,%a,%a,%a\n",frame_number,
+            pos.x(),pos.y(),pos.z(),
+            rot.e0(),rot.e1(),rot.e2(),rot.e3(),
+            speed_BR,speed_BL,speed_FR,speed_FL);*/
+        fprintf(datafile_hr,"%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",frame_number,
+            pos.x(),pos.y(),pos.z(),
+            rot.e0(),rot.e1(),rot.e2(),rot.e3(),
+            speed_BR,speed_BL,speed_FR,speed_FL);
         
         if (auto mfun = std::dynamic_pointer_cast<ChFunction_Const>(my_link_shaftA->GetSpeedFunction()))
             mfun->Set_yconst(wheel_A_rotspeed);
@@ -341,6 +356,9 @@ int main(int argc, char* argv[]) {
 
         application.EndScene();
     }
+    
+    //fclose(datafile);
+    fclose(datafile_hr);
 
     return 0;
 }
