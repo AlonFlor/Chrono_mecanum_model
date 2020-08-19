@@ -47,61 +47,6 @@ float STATIC_wheelfriction = 0.6f;
 #define MAX_ROT_SPEED 0.8
 #define MAX_XZ_SPEED 10
 
-/// Following class will be used to manage events from the user interface
-
-class MyEventReceiver : public IEventReceiver {
-  public:
-    MyEventReceiver(ChIrrAppInterface* myapp) {
-        // store pointer to physical system & other stuff so we can tweak them by user keyboard
-        app = myapp;
-    }
-
-    bool OnEvent(const SEvent& event) {
-        // check if user presses keys
-        if (event.EventType == irr::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown) {
-            switch (event.KeyInput.Key) {
-                case irr::KEY_KEY_Q:
-                    STATIC_x_speed += 1.5;
-                    if (STATIC_x_speed > MAX_XZ_SPEED)
-                        STATIC_x_speed = MAX_XZ_SPEED;
-                    return true;
-                case irr::KEY_KEY_W:
-                    STATIC_x_speed -= 1.5;
-                    if (STATIC_x_speed < -MAX_XZ_SPEED)
-                        STATIC_x_speed = -MAX_XZ_SPEED;
-                    return true;
-                case irr::KEY_KEY_A:
-                    STATIC_z_speed += 1.5;
-                    if (STATIC_z_speed > MAX_XZ_SPEED)
-                        STATIC_z_speed = MAX_XZ_SPEED;
-                    return true;
-                case irr::KEY_KEY_Z:
-                    STATIC_z_speed -= 1.5;
-                    if (STATIC_z_speed < -MAX_XZ_SPEED)
-                        STATIC_z_speed = -MAX_XZ_SPEED;
-                    return true;
-                case irr::KEY_KEY_E:
-                    STATIC_rot_speed += 0.05;
-                    if (STATIC_rot_speed > MAX_ROT_SPEED)
-                        STATIC_rot_speed = MAX_ROT_SPEED;
-                    return true;
-                case irr::KEY_KEY_R:
-                    STATIC_rot_speed -= 0.05;
-                    if (STATIC_rot_speed < -MAX_ROT_SPEED)
-                        STATIC_rot_speed = -MAX_ROT_SPEED;
-                    return true;
-                default:
-                    break;
-            }
-        }
-
-        return false;
-    }
-
-  private:
-    ChIrrAppInterface* app;
-};
-
 // This small function creates a Mecanum wheel, made with many ChBodySceneNode rigid bodies (a central
 // wheel and the many radial rollers, already lined to the wheel with revolute joints.)
 // The function returns the pointer to the central wheel.
@@ -187,7 +132,7 @@ std::shared_ptr<ChBody> create_mecanum_wheel(ChSystemNSC& mphysicalSystem,
 }
 
 int main(int argc, char* argv[]) {
-    GetLog() << "Copyright (c) 2017 projectchrono.org\nChrono version: " << CHRONO_VERSION << "\n\n";
+    GetLog() << "Copyright (c) 2017 projectchrono.org\nFile has been modified in 2020.\nChrono version: " << CHRONO_VERSION << "\n\n";
 
     // Create a ChronoENGINE physical system
     ChSystemNSC mphysicalSystem;
@@ -205,11 +150,6 @@ int main(int argc, char* argv[]) {
     ChIrrWizard::add_typical_Sky(application.GetDevice());
     ChIrrWizard::add_typical_Lights(application.GetDevice());
     ChIrrWizard::add_typical_Camera(application.GetDevice(), core::vector3df(0, 14, -20));
-
-    // This is for GUI tweaking of system parameters..
-    MyEventReceiver receiver(&application);
-    // note how to add a custom event receiver to the default interface:
-    application.SetUserEventReceiver(&receiver);
 
     double L = 23;
     double W = 15.2;
@@ -331,7 +271,7 @@ int main(int argc, char* argv[]) {
                                                            true,         // visualize
                                                            true,         // collide
                                                            ground_mat);  // contact material
-    ground->SetPos(ChVector<>(0, -5, 0));
+    ground->SetPos(ChVector<>(0, -1*wheel_radius-0.01, 0));
     ground->SetBodyFixed(true);
 	mphysicalSystem.Add(ground);
 
@@ -359,6 +299,13 @@ int main(int argc, char* argv[]) {
     // THE SOFT-REAL-TIME CYCLE
     //
 
+    //SET SPEEDS
+    //FL,BR,BL,FR
+    double speed_FL = 1;
+    double speed_BR = 1;
+    double speed_BL = 1;
+    double speed_FR = 1;
+
     application.SetTimestep(0.01);
     application.SetTryRealtime(true);
 
@@ -370,28 +317,19 @@ int main(int argc, char* argv[]) {
         // ADVANCE THE SIMULATION FOR ONE TIMESTEP
         application.DoStep();
 
-        // change motor speeds depending on user setpoints from GUI
+        // change motor speeds 
+        double wheel_A_rotspeed = -1*speed_FL;											//Front left		(minus)
+        double wheel_B_rotspeed = speed_BR;												//Back right
+        double wheel_C_rotspeed = -1*speed_BL;											//Back left		(minus)
+        double wheel_D_rotspeed = speed_FR;												//Front right
 
-        ChVector<> imposed_speed(STATIC_x_speed, 0, STATIC_z_speed);
-        ChFrame<> roll_twist(ChVector<>(0, -wheel_radius, 0), Q_from_AngAxis(-roller_angle, ChVector<>(0, 1, 0)));
-
-        ChFrame<> abs_roll_wA = roll_twist >> f2_wA >> ChFrame<>(mTrussPlatform->GetCoord());
-        double wheel_A_rotspeed =
-            (STATIC_rot_speed * offset/*platform_radius*/) +
-            ((abs_roll_wA.GetA().transpose() * imposed_speed).x() / sin(roller_angle)) / wheel_radius;
-        ChFrame<> abs_roll_wB = roll_twist >> f2_wB >> ChFrame<>(mTrussPlatform->GetCoord());
-        double wheel_B_rotspeed =
-            (STATIC_rot_speed * offset/*platform_radius*/) +
-            ((abs_roll_wB.GetA().transpose() * imposed_speed).x() / sin(roller_angle)) / wheel_radius;
-        ChFrame<> abs_roll_wC = roll_twist >> f2_wC >> ChFrame<>(mTrussPlatform->GetCoord());
-         double wheel_C_rotspeed =
-            (STATIC_rot_speed * offset/*platform_radius*/) +
-            ((abs_roll_wC.GetA().transpose() * imposed_speed).x() / sin(roller_angle)) / wheel_radius;
-        ChFrame<> abs_roll_wD = roll_twist >> f2_wD >> ChFrame<>(mTrussPlatform->GetCoord());
-         double wheel_D_rotspeed =
-            (STATIC_rot_speed * offset/*platform_radius*/) +
-            ((abs_roll_wD.GetA().transpose() * imposed_speed).x() / sin(roller_angle)) / wheel_radius;
-
+        //output data
+        ChVector<> pos = mTrussPlatform->GetPos();
+        ChQuaternion<> rot = mTrussPlatform->GetRot();
+        printf("Position: %f %f %f\n",pos.x(),pos.y(),pos.z());
+        printf("Rotation: %f %f %f %f\n",rot.e0(),rot.e1(),rot.e2(),rot.e3());
+        printf("Speeds: BR: %f\tBL: %f\tFR:  %f\tFL: %f\n",wheel_B_rotspeed,wheel_C_rotspeed,wheel_D_rotspeed,wheel_A_rotspeed);
+        
         if (auto mfun = std::dynamic_pointer_cast<ChFunction_Const>(my_link_shaftA->GetSpeedFunction()))
             mfun->Set_yconst(wheel_A_rotspeed);
         if (auto mfun = std::dynamic_pointer_cast<ChFunction_Const>(my_link_shaftB->GetSpeedFunction()))
