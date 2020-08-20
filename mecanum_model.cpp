@@ -23,6 +23,7 @@
 #include "chrono/utils/ChUtilsGeometry.h"
 #include "chrono/assets/ChBarrelShape.h"
 #include "chrono_irrlicht/ChIrrApp.h"
+#include <string.h>
 
 
 // Use the namespaces of Chrono
@@ -125,28 +126,28 @@ std::shared_ptr<ChBody> create_mecanum_wheel(ChSystemNSC& mphysicalSystem,
     return mCentralWheel;
 }
 
-int main(int argc, char* argv[]) {
-    if(argc<8){printf("Not enough command line arguments. Needed: file_name, time, speed_BL, speed_FL, speed_BR, speed_FR, friction\n");exit(0);}
+int run(char * argv[]){
+    //Needed: file_name, time, speed_BL, speed_FL, speed_BR, speed_FR, friction
     printf("argv:");
-    for(int i=0; i<argc; ++i){
+    for(int i=0; i<7; ++i){
         printf("\t%s",argv[i]);
     }
     printf("\n");
     
     //set output file
-    char file_name[strlen(argv[1])+16];
-    strcpy(file_name,argv[1]);
+    char file_name[strlen(argv[0])+16];
+    strcpy(file_name,argv[0]);
     strcat(file_name, "_trajectory.csv");
     
     //SET TIME LIMIT
-    double time_limit = std::stod(argv[2]);
+    double time_limit = std::stod(argv[1]);
 
     //SET SPEEDS AND FRICTION
-    double speed_BL = std::stod(argv[3]);
-    double speed_FL = std::stod(argv[4]);
-    double speed_BR = std::stod(argv[5]);
-    double speed_FR = std::stod(argv[6]);
-    STATIC_wheelfriction = std::stof(argv[7]);
+    double speed_BL = std::stod(argv[2]);
+    double speed_FL = std::stod(argv[3]);
+    double speed_BR = std::stod(argv[4]);
+    double speed_FR = std::stod(argv[5]);
+    STATIC_wheelfriction = std::stof(argv[6]);
 
     //print out to make sure the data was entered
     printf("output file name: %s\ntime: %f\nspeed_BL: %f\nspeed_FL: %f\nspeed_BR: %f\nspeed_FR: %f\nfriction: %f\n",
@@ -374,3 +375,25 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
+
+
+
+
+int main(int argc, char* argv[]) {
+    std::string line;
+    std::ifstream inputs("Input_script.csv");
+    while (std::getline(inputs, line)) {
+        char line_c_str[line.length() + 1];
+        strcpy(line_c_str, line.c_str());
+        
+        char* parameters[7];
+        char * param = strtok(line_c_str,",");
+        for(int i=0; i<7; ++i) {
+            parameters[i] = param;
+            param = strtok(NULL, ",");
+        }
+        run(parameters);
+    }
+}
+
