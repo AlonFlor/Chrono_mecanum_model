@@ -127,7 +127,7 @@ std::shared_ptr<ChBody> create_mecanum_wheel(ChSystemNSC& mphysicalSystem,
 }
 
 int run(char * argv[]){
-    //Needed: file_name, time, speed_BL, speed_FL, speed_BR, speed_FR, friction
+    //Needed: file_name, time, speed_BR, speed_FR, speed_BL, speed_FL, friction
     printf("argv:");
     for(int i=0; i<7; ++i){
         printf("\t%s",argv[i]);
@@ -143,15 +143,15 @@ int run(char * argv[]){
     double time_limit = std::stod(argv[1]);
 
     //SET SPEEDS AND FRICTION
-    double speed_BL = std::stod(argv[2]);
-    double speed_FL = std::stod(argv[3]);
-    double speed_BR = std::stod(argv[4]);
-    double speed_FR = std::stod(argv[5]);
+    double speed_BR = std::stod(argv[2]);
+    double speed_FR = std::stod(argv[3]);
+    double speed_BL = std::stod(argv[4]);
+    double speed_FL = std::stod(argv[5]);
     STATIC_wheelfriction = std::stof(argv[6]);
 
     //print out to make sure the data was entered
-    printf("output file name: %s\ntime: %f\nspeed_BL: %f\nspeed_FL: %f\nspeed_BR: %f\nspeed_FR: %f\nfriction: %f\n",
-                   file_name, time_limit, speed_BL, speed_FL, speed_BR, speed_FR, STATIC_wheelfriction);
+    printf("output file name: %s\ntime: %f\nspeed_BR: %f\nspeed_FR: %f\nspeed_BL: %f\nspeed_FL: %f\nfriction: %f\n",
+                   file_name, time_limit, speed_BR, speed_FR, speed_BL, speed_FL, STATIC_wheelfriction);
     
     GetLog() << "Copyright (c) 2017 projectchrono.org\nFile has been modified in 2020.\nChrono version: " << CHRONO_VERSION << "\n\n";
 
@@ -170,7 +170,7 @@ int run(char * argv[]){
 
     double L = 23;
     double W = 15.2;
-    double H = 1;
+    double H = 5;
     double offset = 18 / 2;
     
 
