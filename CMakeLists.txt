@@ -125,7 +125,7 @@ endif()
 # files in your project. 
 #--------------------------------------------------------------
 
-add_executable(myexe demo_IRR_mecanum_3.cpp)
+add_executable(myexe mecanum_model.cpp)
 
 #--------------------------------------------------------------
 # Set properties for your executable target
