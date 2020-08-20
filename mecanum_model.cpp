@@ -40,9 +40,6 @@ using namespace irr::video;
 using namespace irr::io;
 using namespace irr::gui;
 
-double STATIC_rot_speed = 0;
-double STATIC_x_speed = 0;
-double STATIC_z_speed = 0;
 float STATIC_wheelfriction = 0.6f;
 #define MAX_ROT_SPEED 0.8
 #define MAX_XZ_SPEED 10
@@ -132,6 +129,21 @@ std::shared_ptr<ChBody> create_mecanum_wheel(ChSystemNSC& mphysicalSystem,
 }
 
 int main(int argc, char* argv[]) {
+    if(argc<6){printf("Not enough command line arguments. Needed: speed_BL, speed_FL, speed_BR, speed_FR, friction\n");exit(0);}
+    printf("argv:");
+    for(int i=0; i<argc; ++i){
+        printf("\t%s",argv[i]);
+    }
+    printf("\n");
+
+    //SET SPEEDS AND FRICTION
+    double speed_BL = std::stod(argv[1]);
+    double speed_FL = std::stod(argv[2]);
+    double speed_BR = std::stod(argv[3]);
+    double speed_FR = std::stod(argv[4]);
+    STATIC_wheelfriction = std::stof(argv[5]);
+    printf("speed_BL: %f\nspeed_FL: %f\nspeed_BR: %f\nspeed_FR: %f\nfriction: %f\n",speed_BL, speed_FL, speed_BR, speed_FR, STATIC_wheelfriction);
+    
     GetLog() << "Copyright (c) 2017 projectchrono.org\nFile has been modified in 2020.\nChrono version: " << CHRONO_VERSION << "\n\n";
 
     // Create a ChronoENGINE physical system
@@ -298,13 +310,6 @@ int main(int argc, char* argv[]) {
     //
     // THE SOFT-REAL-TIME CYCLE
     //
-
-    //SET SPEEDS
-    //FL,BR,BL,FR
-    double speed_FL = 5;
-    double speed_BR = 2;
-    double speed_BL = 5;
-    double speed_FR = 2;
     
     //print data
     int frame_number=0;
@@ -333,9 +338,9 @@ int main(int argc, char* argv[]) {
         frame_number+=1;
         ChVector<> pos = mTrussPlatform->GetPos();
         ChQuaternion<> rot = mTrussPlatform->GetRot();
-        printf("Position: %f %f %f\n",pos.x(),pos.y(),pos.z());
-        printf("Rotation: %f %f %f %f\n",rot.e0(),rot.e1(),rot.e2(),rot.e3());
-        printf("Speeds: BR: %f\tBL: %f\tFR:  %f\tFL: %f\n",speed_BR,speed_BL,speed_FR,speed_FL);
+        //printf("Position: %f %f %f\n",pos.x(),pos.y(),pos.z());
+        //printf("Rotation: %f %f %f %f\n",rot.e0(),rot.e1(),rot.e2(),rot.e3());
+        //printf("Speeds: BR: %f\tBL: %f\tFR:  %f\tFL: %f\n",speed_BR,speed_BL,speed_FR,speed_FL);
         /*fprintf(datafile,"%d,%a,%a,%a,%a,%a,%a,%a,%a,%a,%a,%a\n",frame_number,
             pos.x(),pos.y(),pos.z(),
             rot.e0(),rot.e1(),rot.e2(),rot.e3(),
