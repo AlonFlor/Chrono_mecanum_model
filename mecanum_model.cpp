@@ -1,23 +1,20 @@
 // =============================================================================
-// PROJECT CHRONO - http://projectchrono.org
-//
-// Copyright (c) 2014 projectchrono.org
-// All rights reserved.
-//
-// Use of this source code is governed by a BSD-style license that can be found
-// in the LICENSE file at the top level of the distribution and at
-// http://projectchrono.org/license-chrono.txt.
-//
-// =============================================================================
-// Authors: Alessandro Tasora
-// =============================================================================
-//
-// Demo code about
-// - collisions and contacts
-// - using the 'barrel' shape to create rollers for building omnidirectional
-//   wheels in a mobile robot.
-//
-// =============================================================================
+// mecanum_model.cpp by Alon Flor and Yanshi Luo.
+// 
+// Based on demo code from project chrono. See below comment for more info
+//// =============================================================================
+//// PROJECT CHRONO - http://projectchrono.org
+////
+//// Copyright (c) 2014 projectchrono.org
+//// All rights reserved.
+////
+//// Use of this source code is governed by a BSD-style license that can be found
+//// in the LICENSE file at the top level of the distribution and at
+//// http://projectchrono.org/license-chrono.txt.
+////
+//// =============================================================================
+//// Authors: Alessandro Tasora
+//// =============================================================================
 
 #include "chrono/core/ChRealtimeStep.h"
 #include "chrono/physics/ChLinkMotorRotationSpeed.h"
@@ -129,20 +126,31 @@ std::shared_ptr<ChBody> create_mecanum_wheel(ChSystemNSC& mphysicalSystem,
 }
 
 int main(int argc, char* argv[]) {
-    if(argc<6){printf("Not enough command line arguments. Needed: speed_BL, speed_FL, speed_BR, speed_FR, friction\n");exit(0);}
+    if(argc<8){printf("Not enough command line arguments. Needed: file_name, time, speed_BL, speed_FL, speed_BR, speed_FR, friction\n");exit(0);}
     printf("argv:");
     for(int i=0; i<argc; ++i){
         printf("\t%s",argv[i]);
     }
     printf("\n");
+    
+    //set output file
+    char file_name[strlen(argv[1])+16];
+    strcpy(file_name,argv[1]);
+    strcat(file_name, "_trajectory.csv");
+    
+    //SET TIME LIMIT
+    double time_limit = std::stod(argv[2]);
 
     //SET SPEEDS AND FRICTION
-    double speed_BL = std::stod(argv[1]);
-    double speed_FL = std::stod(argv[2]);
-    double speed_BR = std::stod(argv[3]);
-    double speed_FR = std::stod(argv[4]);
-    STATIC_wheelfriction = std::stof(argv[5]);
-    printf("speed_BL: %f\nspeed_FL: %f\nspeed_BR: %f\nspeed_FR: %f\nfriction: %f\n",speed_BL, speed_FL, speed_BR, speed_FR, STATIC_wheelfriction);
+    double speed_BL = std::stod(argv[3]);
+    double speed_FL = std::stod(argv[4]);
+    double speed_BR = std::stod(argv[5]);
+    double speed_FR = std::stod(argv[6]);
+    STATIC_wheelfriction = std::stof(argv[7]);
+
+    //print out to make sure the data was entered
+    printf("output file name: %s\ntime: %f\nspeed_BL: %f\nspeed_FL: %f\nspeed_BR: %f\nspeed_FR: %f\nfriction: %f\n",
+                   file_name, time_limit, speed_BL, speed_FL, speed_BR, speed_FR, STATIC_wheelfriction);
     
     GetLog() << "Copyright (c) 2017 projectchrono.org\nFile has been modified in 2020.\nChrono version: " << CHRONO_VERSION << "\n\n";
 
@@ -152,10 +160,6 @@ int main(int argc, char* argv[]) {
     // Create the Irrlicht visualization (open the Irrlicht device,
     // bind a simple user interface, etc. etc.)
     ChIrrApp application(&mphysicalSystem, L"Mecanum robot simulator", core::dimension2d<u32>(800, 600), false);
-
-    // create text with info
-    IGUIStaticText* textFPS = application.GetIGUIEnvironment()->addStaticText(
-        L"Use keys Q,W, A,Z, E,R to move the robot", rect<s32>(150, 10, 430, 40), true);
 
     // Easy shortcuts to add camera, lights, logo and sky in Irrlicht scene:
     ChIrrWizard::add_typical_Logo(application.GetDevice());
@@ -294,8 +298,7 @@ int main(int argc, char* argv[]) {
     ground->AddAsset(mtexture);
 
 
-
-	// Use this function for adding a ChIrrNodeAsset to all already created items.
+    // Use this function for adding a ChIrrNodeAsset to all already created items.
     // Otherwise use application.AssetBind(myitem); on a per-item basis.
     application.AssetBindAll();
     application.AssetUpdateAll();
@@ -313,14 +316,18 @@ int main(int argc, char* argv[]) {
     
     //print data
     int frame_number=0;
-    //FILE * datafile = fopen("trajectory.csv","w");
-    FILE * datafile_hr = fopen("trajectory_human_readable.csv","w");
+    //FILE * datafile = fopen(file_name_raw,"w");
+    FILE * datafile_hr = fopen(file_name ,"w");
     fprintf(datafile_hr,"frame number, x, y, z, q0, q1, q2, q3, v_BR, v_BL, v_FR, v_FL\n");
 
-    application.SetTimestep(0.01);
+    double time_step = 0.01;
+    application.SetTimestep(time_step);
     application.SetTryRealtime(true);
+    
+    //set frame limit
+    int frame_limit = (int)std::ceil(time_limit/time_step);
 
-    while (application.GetDevice()->run()) {
+    while (application.GetDevice()->run() && frame_number<frame_limit) {
         application.BeginScene(true, true, SColor(255, 140, 161, 192));
 
         application.DrawAll();
