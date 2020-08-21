@@ -17,7 +17,7 @@ Folder Structure: http://api.projectchrono.org/tutorial_install_project.html
    
 - [x] Find a way to specify [v1, v2, v3, v4] to each wheel
    - [x] Modify from code
-   - [ ] GUI?
+   - [x] GUI?
    	* If we got GUI, task 2 "randomly chosse velocity combination" could be done here, as what we have in PyBullet
    	* There is several GUI demo in the demos/. e.g. demo_IRR_tracks
 
@@ -39,10 +39,13 @@ Folder Structure: http://api.projectchrono.org/tutorial_install_project.html
    - [ ] Tidy to the same format as GT state data 
 
       - [x] GT tidied data should be: xyz started at (0,0,0) [It already is? If I've got it right]
-      - [ ] Easy, We might only needs xyz currently.
-
-      - [ ] **The car should head to y axis (Forward is Y axis, right handside should be X axis)** 
-
+   
+   - [ ] We might only needs xy and z_angle. z_angle is grabbed from quarternion to zyx euler angle, and then pick the first value.
+   
+   - [ ] **The car should head to y axis (Forward is Y axis, right handside should be X axis)** 
+   
+        ![](./img/Actual_Axis.PNG)
+   
    - [ ] Timestep: We just need to make sure the total time are the same.
       * Real data: 60 fps, roughly 6s movement (as is stated in the CSG). Video might be longer. So usually there is roughly 360 informative frames.
       * Simulation data: It doesn't matter how large dt is as long as we are also simulating 6s data. e.g, dt=0.01s then we should simulate 600 timestaps.
