@@ -164,9 +164,9 @@ public:
         // --- The Car Body ---
         // Create the robot truss, as a circular platform
         mTrussPlatform = chrono_types::make_shared<ChBodyEasyBox>(L, H, W,  // x,y,z
-                                                                            1000,                      // density
-                                                                            true,                      // visualize
-                                                                            false);                    // no collision
+                                                                    1000,                      // density
+                                                                    true,                      // visualize
+                                                                    false);                    // no collision
         mphysicalSystem.Add(mTrussPlatform);
 
         // --- Wheels ---
@@ -332,42 +332,42 @@ class MyEventReceiver : public IEventReceiver {
                 case EGET_SCROLL_BAR_CHANGED:
                     if (id == 101) {  // id of 'FL: Wheel A' slider..
                         s32 pos = ((IGUIScrollBar*)event.GUIEvent.Caller)->getPos();
-                        double newthrottle = ((double)(pos)-50) / 50.0;
+                        double newspeed = ((double)(pos)-50) / 50.0;
 
                         // FL Minus
-                        newthrottle = newthrottle * -1.0;
+                        newspeed = newspeed * -1.0;
 
-                        this->mcar->speed_FL = newthrottle;
+                        this->mcar->speed_FL = newspeed;
                         auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftA->GetSpeedFunction());
-                        mfun->Set_yconst(newthrottle * 6);
+                        mfun->Set_yconst(newspeed * 6);
                         return true;
                     }
                     if (id == 102) {  // id of 'BR: Wheel B' slider..
                         s32 pos = ((IGUIScrollBar*)event.GUIEvent.Caller)->getPos();
-                        double newthrottle = ((double)(pos)-50) / 50.0;
-                        this->mcar->speed_BR = newthrottle;
+                        double newspeed = ((double)(pos)-50) / 50.0;
+                        this->mcar->speed_BR = newspeed;
                         auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftB->GetSpeedFunction());
-                        mfun->Set_yconst(newthrottle * 6);
+                        mfun->Set_yconst(newspeed * 6);
                         return true;
                     }
                     if (id == 103) {  // id of 'BL: Wheel C' slider..
                         s32 pos = ((IGUIScrollBar*)event.GUIEvent.Caller)->getPos();
-                        double newthrottle = ((double)(pos)-50) / 50.0;
+                        double newspeed = ((double)(pos)-50) / 50.0;
 
                         // BL Minus
-                        newthrottle = newthrottle * -1.0;
+                        newspeed = newspeed * -1.0;
 
-                        this->mcar->speed_BL = newthrottle;
+                        this->mcar->speed_BL = newspeed;
                         auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftC->GetSpeedFunction());
-                        mfun->Set_yconst(newthrottle * 6);
+                        mfun->Set_yconst(newspeed * 6);
                         return true;
                     }
                     if (id == 104) {  // id of 'FR: Wheel D' slider..
                         s32 pos = ((IGUIScrollBar*)event.GUIEvent.Caller)->getPos();
-                        double newthrottle = ((double)(pos)-50) / 50.0;
-                        this->mcar->speed_FR = newthrottle;
+                        double newspeed = ((double)(pos)-50) / 50.0;
+                        this->mcar->speed_FR = newspeed;
                         auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftD->GetSpeedFunction());
-                        mfun->Set_yconst(newthrottle * 6);
+                        mfun->Set_yconst(newspeed * 6);
                         return true;
                     }
                     break;
@@ -468,7 +468,7 @@ int main(int argc, char* argv[]) {
     //
 
     mphysicalSystem.SetSolverType(ChSolver::Type::PSOR);
-    mphysicalSystem.SetSolverMaxIterations(100);  // the higher, the easier to keep the constraints satisfied.
+    mphysicalSystem.SetSolverMaxIterations(30);  // the higher, the easier to keep the constraints satisfied.
 
     //
     // Simulation loop
