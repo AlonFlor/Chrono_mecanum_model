@@ -326,6 +326,15 @@ int run(char * argv[]){
     
     //set frame limit
     int frame_limit = (int)std::ceil(time_limit/time_step);
+    
+    //Get initial coordinates for transforming in the output
+    ChVector<> init_pos = mTrussPlatform->GetPos();
+    double init_pos_x = init_pos.x();
+    double init_pos_z = init_pos.z();
+    ChQuaternion<> init_rot = mTrussPlatform->GetRot();
+    ChMatrix33<> init_rot_transform(init_rot);
+    ChVector<> init_direction = init_rot_transform*ChVector<>(1,0,0);
+    double init_theta = atan2(init_direction.x(),init_direction.z());	//x is the new y, z is the new x
 
     while (application.GetDevice()->run() && frame_number<frame_limit) {
         application.BeginScene(true, true, SColor(255, 140, 161, 192));
@@ -354,7 +363,7 @@ int run(char * argv[]){
         //printf("Speeds: BR: %f\tBL: %f\tFR:  %f\tFL: %f\n",speed_BR,speed_BL,speed_FR,speed_FL);
         
         fprintf(datafile,"%d,%f,%f,%f,%f,%f,%f,%f\n",frame_number,
-            pos.z(),pos.x(),theta,				//x is the new y, z is the new x
+            pos.z()-init_pos_z,pos.x()-init_pos_x,theta-init_theta,				//x is the new y, z is the new x
             speed_BR,speed_BL,speed_FR,speed_FL);
         
         if (auto mfun = std::dynamic_pointer_cast<ChFunction_Const>(my_link_shaftA->GetSpeedFunction()))
