@@ -283,12 +283,12 @@ int run(char * argv[]){
     auto ground_mat = chrono_types::make_shared<ChMaterialSurfaceNSC>();
     ground_mat->SetFriction(STATIC_wheelfriction);
 
-    auto ground = chrono_types::make_shared<ChBodyEasyBox>(200, 1, 200,  // size
+    auto ground = chrono_types::make_shared<ChBodyEasyBox>(400, 1, 400,  // size
                                                            1000,         // density
                                                            true,         // visualize
                                                            true,         // collide
                                                            ground_mat);  // contact material
-    ground->SetPos(ChVector<>(0, -1*wheel_radius-0.01, 0));
+    ground->SetPos(ChVector<>(0, -1*wheel_radius-1.0, 0));
     ground->SetBodyFixed(true);
 	mphysicalSystem.Add(ground);
 
