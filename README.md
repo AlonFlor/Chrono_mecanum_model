@@ -3,6 +3,9 @@
 ## Update Notes
 
 * 08/16: `demo_IRR_mecanum_3`, 4-wheel version, only 
+* 08/21: `mecanum_GUI.cpp`, GUI version
+  * Scrollbar: Not yet tested what value it parsed.
+  * New speed: Should add some UI text to indicate current value
 
 
 
