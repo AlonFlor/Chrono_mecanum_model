@@ -125,7 +125,7 @@ endif()
 # files in your project. 
 #--------------------------------------------------------------
 
-add_executable(myexe mecanum_model.cpp)
+add_executable(myexe mecanum_GUI.cpp)
 
 #--------------------------------------------------------------
 # Set properties for your executable target
