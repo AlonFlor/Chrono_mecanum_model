@@ -317,9 +317,8 @@ int run(char * argv[]){
     
     //print data
     int frame_number=0;
-    //FILE * datafile = fopen(file_name_raw,"w");
-    FILE * datafile_hr = fopen(file_name ,"w");
-    fprintf(datafile_hr,"frame number, x, y, z, q0, q1, q2, q3, v_BR, v_BL, v_FR, v_FL\n");
+    FILE * datafile = fopen(file_name ,"w");
+    fprintf(datafile,"frame number, x, y, theta, v_BR, v_BL, v_FR, v_FL\n");
 
     double time_step = 0.01;
     application.SetTimestep(time_step);
@@ -343,19 +342,19 @@ int run(char * argv[]){
         double wheel_D_rotspeed = speed_FR;												//Front right
 
         //output data
+        //transform coordinates so (x,y,z) becomes (z,x)
         frame_number+=1;
         ChVector<> pos = mTrussPlatform->GetPos();
         ChQuaternion<> rot = mTrussPlatform->GetRot();
+        ChMatrix33<> rot_transform(rot);
+        ChVector<> direction = rot_transform*ChVector<>(1,0,0);
+        double theta = atan2(direction.x(),direction.z());	//x is the new y, z is the new x
         //printf("Position: %f %f %f\n",pos.x(),pos.y(),pos.z());
         //printf("Rotation: %f %f %f %f\n",rot.e0(),rot.e1(),rot.e2(),rot.e3());
         //printf("Speeds: BR: %f\tBL: %f\tFR:  %f\tFL: %f\n",speed_BR,speed_BL,speed_FR,speed_FL);
-        /*fprintf(datafile,"%d,%a,%a,%a,%a,%a,%a,%a,%a,%a,%a,%a\n",frame_number,
-            pos.x(),pos.y(),pos.z(),
-            rot.e0(),rot.e1(),rot.e2(),rot.e3(),
-            speed_BR,speed_BL,speed_FR,speed_FL);*/
-        fprintf(datafile_hr,"%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",frame_number,
-            pos.x(),pos.y(),pos.z(),
-            rot.e0(),rot.e1(),rot.e2(),rot.e3(),
+        
+        fprintf(datafile,"%d,%f,%f,%f,%f,%f,%f,%f\n",frame_number,
+            pos.z(),pos.x(),theta,				//x is the new y, z is the new x
             speed_BR,speed_BL,speed_FR,speed_FL);
         
         if (auto mfun = std::dynamic_pointer_cast<ChFunction_Const>(my_link_shaftA->GetSpeedFunction()))
@@ -370,8 +369,7 @@ int run(char * argv[]){
         application.EndScene();
     }
     
-    //fclose(datafile);
-    fclose(datafile_hr);
+    fclose(datafile);
 
     return 0;
 }
