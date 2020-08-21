@@ -283,7 +283,7 @@ int run(char * argv[]){
     auto ground_mat = chrono_types::make_shared<ChMaterialSurfaceNSC>();
     ground_mat->SetFriction(STATIC_wheelfriction);
 
-    auto ground = chrono_types::make_shared<ChBodyEasyBox>(400, 1, 400,  // size
+    auto ground = chrono_types::make_shared<ChBodyEasyBox>(1000, 1, 1000,  // size
                                                            1000,         // density
                                                            true,         // visualize
                                                            true,         // collide
