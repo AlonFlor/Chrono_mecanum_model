@@ -320,6 +320,15 @@ class MyEventReceiver : public IEventReceiver {
         scrollbar_FR->setPos(50);
         text_FR =
             application->GetIGUIEnvironment()->addStaticText(L"Front Right Wheel", rect<s32>(650, 95, 750, 110), false);
+
+        sprintf(this->message, "FL: %4.4f, FR: %4.4f, , BL: %4.4f, BR: %4.4f\n", mcar->speed_FL, mcar->speed_FR, mcar->speed_BL, mcar->speed_BR);
+        text_vec = application->GetIGUIEnvironment()->addStaticText(
+            core::stringw(this->message).c_str(), rect<s32>(150, 10, 430, 40), false);
+    }
+
+    void OnChangeScreenInfo(){
+        sprintf(this->message, "FL: %4.4f, FR: %4.4f, BL: %4.4f, BR: %4.4f\n", this->mcar->speed_FL, this->mcar->speed_FR, this->mcar->speed_BL, this->mcar->speed_BR);
+        this->text_vec->setText(core::stringw(this->message).c_str());
     }
 
     bool OnEvent(const SEvent& event) {
@@ -339,7 +348,8 @@ class MyEventReceiver : public IEventReceiver {
 
                         this->mcar->speed_FL = newspeed;
                         auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftA->GetSpeedFunction());
-                        mfun->Set_yconst(newspeed * 6);
+                        mfun->Set_yconst(newspeed);
+                        this->OnChangeScreenInfo();
                         return true;
                     }
                     if (id == 102) {  // id of 'BR: Wheel B' slider..
@@ -347,7 +357,8 @@ class MyEventReceiver : public IEventReceiver {
                         double newspeed = ((double)(pos)-50) / 50.0;
                         this->mcar->speed_BR = newspeed;
                         auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftB->GetSpeedFunction());
-                        mfun->Set_yconst(newspeed * 6);
+                        mfun->Set_yconst(newspeed);
+                        this->OnChangeScreenInfo();
                         return true;
                     }
                     if (id == 103) {  // id of 'BL: Wheel C' slider..
@@ -359,7 +370,8 @@ class MyEventReceiver : public IEventReceiver {
 
                         this->mcar->speed_BL = newspeed;
                         auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftC->GetSpeedFunction());
-                        mfun->Set_yconst(newspeed * 6);
+                        mfun->Set_yconst(newspeed);
+                        this->OnChangeScreenInfo();
                         return true;
                     }
                     if (id == 104) {  // id of 'FR: Wheel D' slider..
@@ -367,7 +379,8 @@ class MyEventReceiver : public IEventReceiver {
                         double newspeed = ((double)(pos)-50) / 50.0;
                         this->mcar->speed_FR = newspeed;
                         auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftD->GetSpeedFunction());
-                        mfun->Set_yconst(newspeed * 6);
+                        mfun->Set_yconst(newspeed);
+                        this->OnChangeScreenInfo();
                         return true;
                     }
                     break;
@@ -394,6 +407,9 @@ class MyEventReceiver : public IEventReceiver {
 
     IGUIStaticText* text_FR;
     IGUIScrollBar* scrollbar_FR;
+
+    char message[100];
+    IGUIStaticText* text_vec;
 };
 
 //
@@ -414,7 +430,7 @@ int main(int argc, char* argv[]) {
     ChIrrWizard::add_typical_Logo(application.GetDevice());
     ChIrrWizard::add_typical_Sky(application.GetDevice());
     ChIrrWizard::add_typical_Lights(application.GetDevice());
-    ChIrrWizard::add_typical_Camera(application.GetDevice(), core::vector3df(0, 0, -6), core::vector3df(-2, 2, 0));
+    ChIrrWizard::add_typical_Camera(application.GetDevice(), core::vector3df(0, 14, -20));
 
     // 2- Create the rigid bodies of the simpified tank suspension mechanical system
     //   maybe setting position/mass/inertias of
@@ -466,7 +482,7 @@ int main(int argc, char* argv[]) {
     //
     // SETTINGS
     //
-
+    // system.Set_G_acc(ChVector<>(0, -10, 0));
     mphysicalSystem.SetSolverType(ChSolver::Type::PSOR);
     mphysicalSystem.SetSolverMaxIterations(30);  // the higher, the easier to keep the constraints satisfied.
 
@@ -488,6 +504,7 @@ int main(int argc, char* argv[]) {
         ChIrrTools::drawGrid(application.GetVideoDriver(), 2, 2, 30, 30,
                              ChCoordsys<>(ChVector<>(0, 0.01, 0), Q_from_AngX(CH_C_PI_2)),
                              video::SColor(255, 60, 60, 60), true);
+        ChIrrTools::drawAllCOGs(mphysicalSystem, application.GetVideoDriver(), 5.0);
 
         // HERE CHRONO INTEGRATION IS PERFORMED:
         application.DoStep();
