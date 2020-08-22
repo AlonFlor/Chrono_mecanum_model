@@ -125,7 +125,19 @@ endif()
 # files in your project. 
 #--------------------------------------------------------------
 
-add_executable(myexe mecanum_GUI.cpp)
+add_executable(mecanum_model mecanum_model.cpp)
+set_target_properties(mecanum_model PROPERTIES 
+	    COMPILE_FLAGS "${CHRONO_CXX_FLAGS} ${EXTRA_COMPILE_FLAGS}"
+	    COMPILE_DEFINITIONS "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\""
+	    LINK_FLAGS "${CHRONO_LINKER_FLAGS}")
+target_link_libraries(mecanum_model ${CHRONO_LIBRARIES})
+#--------------------------------------------------------------
+# === 3 ===
+# Add the executable from your project and specify all C++ 
+# files in your project. 
+#--------------------------------------------------------------
+
+add_executable(mecanum_GUI mecanum_GUI.cpp)
 
 #--------------------------------------------------------------
 # Set properties for your executable target
@@ -136,7 +148,7 @@ add_executable(myexe mecanum_GUI.cpp)
 # install tree (if using an installed version of Chrono).
 #--------------------------------------------------------------
 
-set_target_properties(myexe PROPERTIES 
+set_target_properties(mecanum_GUI PROPERTIES 
 	    COMPILE_FLAGS "${CHRONO_CXX_FLAGS} ${EXTRA_COMPILE_FLAGS}"
 	    COMPILE_DEFINITIONS "CHRONO_DATA_DIR=\"${CHRONO_DATA_DIR}\""
 	    LINK_FLAGS "${CHRONO_LINKER_FLAGS}")
@@ -145,7 +157,7 @@ set_target_properties(myexe PROPERTIES
 # Link to Chrono libraries and dependency libraries
 #--------------------------------------------------------------
 
-target_link_libraries(myexe ${CHRONO_LIBRARIES})
+target_link_libraries(mecanum_GUI ${CHRONO_LIBRARIES})
 
 #--------------------------------------------------------------
 # === 4 (OPTIONAL) ===

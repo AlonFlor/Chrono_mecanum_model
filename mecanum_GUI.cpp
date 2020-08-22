@@ -119,9 +119,9 @@ class MySimpleCar
 public:
 
     // Speed of each wheel
-    double speed_FL;
+    double speed_FL; //-1
     double speed_BR;
-    double speed_BL;
+    double speed_BL; //-1
     double speed_FR;
 
     // The parts making the car, as 3d Irrlicht scene nodes, each containing
@@ -139,6 +139,30 @@ public:
     std::shared_ptr<ChLinkMotorRotationSpeed> my_link_shaftD;   //FR
 
     // THE FUNCTIONS
+    void SetVecFL(double input)
+    {
+        speed_FL = input;
+        if (auto mfun = std::dynamic_pointer_cast<ChFunction_Const>(my_link_shaftA->GetSpeedFunction()))
+            mfun->Set_yconst(-1*speed_FL);
+    }
+    void SetVecFR(double input)
+    {
+        speed_FR = input;
+        if (auto mfun = std::dynamic_pointer_cast<ChFunction_Const>(my_link_shaftD->GetSpeedFunction()))
+            mfun->Set_yconst(speed_FR);
+    }
+    void SetVecBL(double input)
+    {
+        speed_BL = input;
+        if (auto mfun = std::dynamic_pointer_cast<ChFunction_Const>(my_link_shaftC->GetSpeedFunction()))
+            mfun->Set_yconst(-1*speed_BL);
+    }
+    void SetVecBR(double input)
+    {
+        speed_BR = input;
+        if (auto mfun = std::dynamic_pointer_cast<ChFunction_Const>(my_link_shaftB->GetSpeedFunction()))
+            mfun->Set_yconst(speed_BR);
+    }
 
     // Build and initialize the car, creating all bodies corresponding to
     // the various parts and adding them to the physical system - also creating
@@ -149,6 +173,10 @@ public:
     ){
         // Initially, speed set as 0
         speed_FL = speed_BR = speed_BL = speed_FR = 0;
+        // speed_FL = 1;
+        // speed_BR = 1;
+        // speed_BL = -1;
+        // speed_FR = -1;
         
         // Car Body: Length, Width and Height. 
         // Offset: the distance between wheel COM and car COM
@@ -253,6 +281,10 @@ public:
         my_link_shaftD->SetSpeedFunction(chrono_types::make_shared<ChFunction_Const>(0));
         mphysicalSystem.AddLink(my_link_shaftD);
 
+        this->SetVecFL(speed_FL);
+        this->SetVecFR(speed_FR);
+        this->SetVecBL(speed_BL);
+        this->SetVecBR(speed_BR);
 
     }
 
@@ -343,21 +375,24 @@ class MyEventReceiver : public IEventReceiver {
                         s32 pos = ((IGUIScrollBar*)event.GUIEvent.Caller)->getPos();
                         double newspeed = ((double)(pos)-50) / 50.0;
 
+                        this->mcar->SetVecFL(newspeed);
                         // FL Minus
-                        newspeed = newspeed * -1.0;
-
-                        this->mcar->speed_FL = newspeed;
-                        auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftA->GetSpeedFunction());
-                        mfun->Set_yconst(newspeed);
+                        // newspeed = newspeed * -1.0;
+                        // this->mcar->speed_FL = newspeed;
+                        // auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftA->GetSpeedFunction());
+                        // mfun->Set_yconst(newspeed);
                         this->OnChangeScreenInfo();
                         return true;
                     }
                     if (id == 102) {  // id of 'BR: Wheel B' slider..
                         s32 pos = ((IGUIScrollBar*)event.GUIEvent.Caller)->getPos();
                         double newspeed = ((double)(pos)-50) / 50.0;
-                        this->mcar->speed_BR = newspeed;
-                        auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftB->GetSpeedFunction());
-                        mfun->Set_yconst(newspeed);
+
+                        this->mcar->SetVecBR(newspeed);
+
+                        // this->mcar->speed_BR = newspeed;
+                        // auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftB->GetSpeedFunction());
+                        // mfun->Set_yconst(newspeed);
                         this->OnChangeScreenInfo();
                         return true;
                     }
@@ -365,21 +400,26 @@ class MyEventReceiver : public IEventReceiver {
                         s32 pos = ((IGUIScrollBar*)event.GUIEvent.Caller)->getPos();
                         double newspeed = ((double)(pos)-50) / 50.0;
 
-                        // BL Minus
-                        newspeed = newspeed * -1.0;
+                        this->mcar->SetVecBL(newspeed);
 
-                        this->mcar->speed_BL = newspeed;
-                        auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftC->GetSpeedFunction());
-                        mfun->Set_yconst(newspeed);
+                        // // BL Minus
+                        // newspeed = newspeed * -1.0;
+
+                        // this->mcar->speed_BL = newspeed;
+                        // auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftC->GetSpeedFunction());
+                        // mfun->Set_yconst(newspeed);
                         this->OnChangeScreenInfo();
                         return true;
                     }
                     if (id == 104) {  // id of 'FR: Wheel D' slider..
                         s32 pos = ((IGUIScrollBar*)event.GUIEvent.Caller)->getPos();
                         double newspeed = ((double)(pos)-50) / 50.0;
-                        this->mcar->speed_FR = newspeed;
-                        auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftD->GetSpeedFunction());
-                        mfun->Set_yconst(newspeed);
+
+                        this->mcar->SetVecFR(newspeed);
+
+                        // this->mcar->speed_FR = newspeed;
+                        // auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftD->GetSpeedFunction());
+                        // mfun->Set_yconst(newspeed);
                         this->OnChangeScreenInfo();
                         return true;
                     }
@@ -490,8 +530,8 @@ int main(int argc, char* argv[]) {
     // Simulation loop
     //
 
-    application.SetTimestep(0.03);
-    application.SetTryRealtime(true);
+    application.SetTimestep(0.01);
+    application.SetTryRealtime(false);
 
     while (application.GetDevice()->run()) {
         // Irrlicht must prepare frame to draw
