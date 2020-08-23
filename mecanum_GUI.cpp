@@ -116,6 +116,10 @@ std::shared_ptr<ChBody> create_mecanum_wheel(ChSystemNSC& mphysicalSystem,
 
 class MySimpleCar
 {
+
+private:
+    // double init_pos_x, init_pos_z, init_theta;
+
 public:
 
     // Speed of each wheel
@@ -138,7 +142,7 @@ public:
     std::shared_ptr<ChLinkMotorRotationSpeed> my_link_shaftC;   //BL
     std::shared_ptr<ChLinkMotorRotationSpeed> my_link_shaftD;   //FR
 
-    // THE FUNCTIONS
+    // --- Setter ---
     void SetVecFL(double input)
     {
         speed_FL = input;
@@ -164,10 +168,33 @@ public:
             mfun->Set_yconst(speed_BR);
     }
 
+    // // --- Dump to file ---
+
+    // void GetCSVLine()
+    // {
+    //     char line[300];
+
+    //     ChVector<> pos = mTrussPlatform->GetPos();
+    //     ChQuaternion<> rot = mTrussPlatform->GetRot();
+    //     ChMatrix33<> rot_transform(rot);
+    //     ChVector<> direction = rot_transform*ChVector<>(1,0,0);
+    //     double theta = atan2(direction.x(),direction.z());	//x is the new y, z is the new x
+
+    //     // sprintf(line,"%d,%f,%f,%f,%f,%f,%f,%f\n",frame_number,
+    //     sprintf(line,"%f,%f,%f,%f,%f,%f,%f\n",
+    //         pos.z()-init_pos_z,pos.x()-init_pos_x,theta-init_theta,				//x is the new y, z is the new x
+    //         speed_BR,speed_BL,speed_FR,speed_FL);
+
+    //     printf(line);
+    // }
+
+
+    // THE FUNCTIONS
+
     // Build and initialize the car, creating all bodies corresponding to
     // the various parts and adding them to the physical system - also creating
     // and adding constraints to the system.
-    MySimpleCar(ChSystemNSC& mphysicalSystem,        ///< the Chrono physical system
+    MySimpleCar(ChSystemNSC& mphysicalSystem,   ///< the Chrono physical system
                 ISceneManager* msceneManager,  ///< the Irrlicht scene manager for 3d shapes
                 IVideoDriver* mdriver          ///< the Irrlicht video driver
     ){
@@ -281,6 +308,16 @@ public:
         my_link_shaftD->SetSpeedFunction(chrono_types::make_shared<ChFunction_Const>(0));
         mphysicalSystem.AddLink(my_link_shaftD);
 
+        // //Get initial coordinates for transforming in the output
+        // ChVector<> init_pos = mTrussPlatform->GetPos();
+        // this->init_pos_x = init_pos.x();
+        // this->init_pos_z = init_pos.z();
+        // ChQuaternion<> init_rot = mTrussPlatform->GetRot();
+        // ChMatrix33<> init_rot_transform(init_rot);
+        // ChVector<> init_direction = init_rot_transform*ChVector<>(1,0,0);
+        // this->init_theta = atan2(init_direction.x(),init_direction.z());	//x is the new y, z is the new x
+
+        // Set Velocity
         this->SetVecFL(speed_FL);
         this->SetVecFR(speed_FR);
         this->SetVecBL(speed_BL);
@@ -376,11 +413,6 @@ class MyEventReceiver : public IEventReceiver {
                         double newspeed = ((double)(pos)-50) / 50.0;
 
                         this->mcar->SetVecFL(newspeed);
-                        // FL Minus
-                        // newspeed = newspeed * -1.0;
-                        // this->mcar->speed_FL = newspeed;
-                        // auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftA->GetSpeedFunction());
-                        // mfun->Set_yconst(newspeed);
                         this->OnChangeScreenInfo();
                         return true;
                     }
@@ -389,10 +421,6 @@ class MyEventReceiver : public IEventReceiver {
                         double newspeed = ((double)(pos)-50) / 50.0;
 
                         this->mcar->SetVecBR(newspeed);
-
-                        // this->mcar->speed_BR = newspeed;
-                        // auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftB->GetSpeedFunction());
-                        // mfun->Set_yconst(newspeed);
                         this->OnChangeScreenInfo();
                         return true;
                     }
@@ -401,13 +429,6 @@ class MyEventReceiver : public IEventReceiver {
                         double newspeed = ((double)(pos)-50) / 50.0;
 
                         this->mcar->SetVecBL(newspeed);
-
-                        // // BL Minus
-                        // newspeed = newspeed * -1.0;
-
-                        // this->mcar->speed_BL = newspeed;
-                        // auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftC->GetSpeedFunction());
-                        // mfun->Set_yconst(newspeed);
                         this->OnChangeScreenInfo();
                         return true;
                     }
@@ -416,10 +437,6 @@ class MyEventReceiver : public IEventReceiver {
                         double newspeed = ((double)(pos)-50) / 50.0;
 
                         this->mcar->SetVecFR(newspeed);
-
-                        // this->mcar->speed_FR = newspeed;
-                        // auto mfun = std::static_pointer_cast<ChFunction_Const>(mcar->my_link_shaftD->GetSpeedFunction());
-                        // mfun->Set_yconst(newspeed);
                         this->OnChangeScreenInfo();
                         return true;
                     }
@@ -464,7 +481,11 @@ int main(int argc, char* argv[]) {
     ChSystemNSC mphysicalSystem;
 
     // Create the Irrlicht visualization (open the Irrlicht device, bind a simple user interface, etc. etc.)
-    ChIrrApp application(&mphysicalSystem, L"Mecanum robot simulator", core::dimension2d<u32>(800, 600), false, true);
+    ChIrrApp application(&mphysicalSystem,                      // ChSystem
+                        L"Mecanum robot simulator",             // Title
+                        core::dimension2d<u32>(800, 600),       // Window Size
+                        false,                                  // Do full screen?
+                        true);                                  // do_shadows
 
     // Easy shortcuts to add logo, camera, lights and sky in Irrlicht scene:
     ChIrrWizard::add_typical_Logo(application.GetDevice());
@@ -525,6 +546,8 @@ int main(int argc, char* argv[]) {
     // system.Set_G_acc(ChVector<>(0, -10, 0));
     mphysicalSystem.SetSolverType(ChSolver::Type::PSOR);
     mphysicalSystem.SetSolverMaxIterations(30);  // the higher, the easier to keep the constraints satisfied.
+    
+    mphysicalSystem.SetStep(0.01); // Sets the time step used for integration (dynamical simulation).
 
     //
     // Simulation loop
@@ -548,6 +571,12 @@ int main(int argc, char* argv[]) {
 
         // HERE CHRONO INTEGRATION IS PERFORMED:
         application.DoStep();
+
+        // TODO?
+        // auto mTrussPlatform = application.GetSystem()->SearchBodyID(0);
+        // ChVector<> pos = mTrussPlatform->GetPos();
+        // ChQuaternion<> rot = mTrussPlatform->GetRot();
+        // printf("%d, %d\n", pos.z(), pos.z());
 
         application.EndScene();
     }
