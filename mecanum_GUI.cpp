@@ -199,11 +199,11 @@ public:
                 IVideoDriver* mdriver          ///< the Irrlicht video driver
     ){
         // Initially, speed set as 0
-        speed_FL = speed_BR = speed_BL = speed_FR = 0;
-        // speed_FL = 1;
-        // speed_BR = 1;
-        // speed_BL = -1;
-        // speed_FR = -1;
+        // speed_FL = speed_BR = speed_BL = speed_FR = 0;
+        speed_FL = 0;
+        speed_BR = 10;
+        speed_BL = 0;
+        speed_FR = 0;
         
         // Car Body: Length, Width and Height. 
         // Offset: the distance between wheel COM and car COM
@@ -368,11 +368,11 @@ class MyEventReceiver : public IEventReceiver {
 
         // ..add a GUI slider to control wheel right via mouse
         scrollbar_BR =
-            application->GetIGUIEnvironment()->addScrollBar(true, rect<s32>(510, 45, 650, 60), 0, 102);
+            application->GetIGUIEnvironment()->addScrollBar(true, rect<s32>(510, 95, 650, 110), 0, 102);
         scrollbar_BR->setMax(100);
         scrollbar_BR->setPos(50);
         text_BR =
-            application->GetIGUIEnvironment()->addStaticText(L"Back Right Wheel", rect<s32>(650, 45, 750, 60), false);
+            application->GetIGUIEnvironment()->addStaticText(L"Back Right Wheel", rect<s32>(650, 95, 750, 110), false);
 
         // ..add a GUI slider to control wheel right via mouse
         scrollbar_BL =
@@ -384,11 +384,11 @@ class MyEventReceiver : public IEventReceiver {
 
         // ..add a GUI slider to control wheel right via mouse
         scrollbar_FR =
-            application->GetIGUIEnvironment()->addScrollBar(true, rect<s32>(510, 95, 650, 110), 0, 104);
+            application->GetIGUIEnvironment()->addScrollBar(true, rect<s32>(510, 45, 650, 60), 0, 104);
         scrollbar_FR->setMax(100);
         scrollbar_FR->setPos(50);
         text_FR =
-            application->GetIGUIEnvironment()->addStaticText(L"Front Right Wheel", rect<s32>(650, 95, 750, 110), false);
+            application->GetIGUIEnvironment()->addStaticText(L"Front Right Wheel", rect<s32>(650, 45, 750, 60), false);
 
         // Pos.x: %4.4f, Pos.y: %4.4f, Pos.z: %4.4f\n
         ChVector<> pos = mcar->mTrussPlatform->GetPos();
@@ -504,7 +504,7 @@ int main(int argc, char* argv[]) {
     auto ground_mat = chrono_types::make_shared<ChMaterialSurfaceNSC>();
     ground_mat->SetFriction(STATIC_wheelfriction);
 
-    auto ground = chrono_types::make_shared<ChBodyEasyBox>(200, 1, 200,  // size
+    auto ground = chrono_types::make_shared<ChBodyEasyBox>(1000, 1, 1000,  // size
                                                            1000,         // density
                                                            false,         // visualize
                                                            true,         // collide
@@ -574,7 +574,7 @@ int main(int argc, char* argv[]) {
 
         // HERE CHRONO INTEGRATION IS PERFORMED:
         application.DoStep();
-
+        
         // TODO?
         ChVector<> pos = mycar->mTrussPlatform->GetPos();
         ChQuaternion<> rot = mycar->mTrussPlatform->GetRot();
