@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.spatial.transform import Rotation as R
 
 import glob
 import os
@@ -30,10 +31,22 @@ def loadDF(filepath):
 
 def loadChronoOutput(f):
     df = pd.read_csv(f)
-    tidy = df[[' x', ' y', ' theta']]
-    tidy = tidy.rename(str.strip, axis='columns')
+    df['angle'] = df.apply(lambda x: quar2euler(x['q0'], x['qx'], x['qy'], x['qz']), axis=1)
+    df['x'] = -df['posz'] / 100.0
+    df['y'] = df['posx'] / 100.0
+    tidy = df[['x', 'y', 'angle']]
     return tidy
 
+
+# df.apply(lambda x: quar2euler(x['q0'], x['qx'], x['qy'], x['qz']), axis=1)
+def quar2euler(w, qx, qy, qz):
+    """
+    Chrono: w, q1, q2, q3
+    Rotation: q1, q2, q3, w
+    """
+    r = R.from_quat([qx, qy, qz, w])
+    rz = r.as_euler('yzx', degrees=False)[0]
+    return rz
 
 def plotComparison(idx, gt_fpath, out_fpath):
     plt.cla()
@@ -52,9 +65,12 @@ def plotComparison(idx, gt_fpath, out_fpath):
 output_dir = './build/Release/'
 outFiles = sorted(glob.glob(os.path.join(output_dir, '*_trajectory.csv')))
 
-f0 = state_files[0]
-f1 = outFiles[0]
-plotComparison('1', f0, f1)
+# f0 = state_files[0]
+# f1 = outFiles[0]
+# plotComparison('7', f0, f1)
+
+for idx, origin, out, in zip(sort_selected, state_files,outFiles):
+    plotComparison(idx, origin, out)
 
 
 # ######### Bullet Exmaple

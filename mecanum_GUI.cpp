@@ -390,13 +390,16 @@ class MyEventReceiver : public IEventReceiver {
         text_FR =
             application->GetIGUIEnvironment()->addStaticText(L"Front Right Wheel", rect<s32>(650, 95, 750, 110), false);
 
-        sprintf(this->message, "FL: %4.4f, FR: %4.4f, , BL: %4.4f, BR: %4.4f\n", mcar->speed_FL, mcar->speed_FR, mcar->speed_BL, mcar->speed_BR);
+        // Pos.x: %4.4f, Pos.y: %4.4f, Pos.z: %4.4f\n
+        ChVector<> pos = mcar->mTrussPlatform->GetPos();
+        sprintf(this->message, "Pos.x: %4.4f, Pos.y: %4.4f, Pos.z: %4.4f\nFL: %4.4f, FR: %4.4f, , BL: %4.4f, BR: %4.4f\n",pos.x(),pos.y(),pos.z(), mcar->speed_FL, mcar->speed_FR, mcar->speed_BL, mcar->speed_BR);
         text_vec = application->GetIGUIEnvironment()->addStaticText(
             core::stringw(this->message).c_str(), rect<s32>(150, 10, 430, 40), false);
     }
 
     void OnChangeScreenInfo(){
-        sprintf(this->message, "FL: %4.4f, FR: %4.4f, BL: %4.4f, BR: %4.4f\n", this->mcar->speed_FL, this->mcar->speed_FR, this->mcar->speed_BL, this->mcar->speed_BR);
+        ChVector<> pos = mcar->mTrussPlatform->GetPos();
+        sprintf(this->message, "Pos.x: %4.4f, Pos.y: %4.4f, Pos.z: %4.4f\nFL: %4.4f, FR: %4.4f, BL: %4.4f, BR: %4.4f\n",pos.x(),pos.y(),pos.z(),  this->mcar->speed_FL, this->mcar->speed_FR, this->mcar->speed_BL, this->mcar->speed_BR);
         this->text_vec->setText(core::stringw(this->message).c_str());
     }
 
@@ -503,7 +506,7 @@ int main(int argc, char* argv[]) {
 
     auto ground = chrono_types::make_shared<ChBodyEasyBox>(200, 1, 200,  // size
                                                            1000,         // density
-                                                           true,         // visualize
+                                                           false,         // visualize
                                                            true,         // collide
                                                            ground_mat);  // contact material
     // ground->SetPos(ChVector<>(0, -1, 0));
@@ -573,10 +576,9 @@ int main(int argc, char* argv[]) {
         application.DoStep();
 
         // TODO?
-        // auto mTrussPlatform = application.GetSystem()->SearchBodyID(0);
-        // ChVector<> pos = mTrussPlatform->GetPos();
-        // ChQuaternion<> rot = mTrussPlatform->GetRot();
-        // printf("%d, %d\n", pos.z(), pos.z());
+        ChVector<> pos = mycar->mTrussPlatform->GetPos();
+        ChQuaternion<> rot = mycar->mTrussPlatform->GetRot();
+        printf("Z: %4.4f, X: %4.4f\n", pos.z(), pos.x());
 
         application.EndScene();
     }

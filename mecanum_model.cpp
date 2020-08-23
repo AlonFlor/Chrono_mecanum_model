@@ -168,6 +168,7 @@ int run(char * argv[]){
     ChIrrWizard::add_typical_Lights(application.GetDevice());
     ChIrrWizard::add_typical_Camera(application.GetDevice(), core::vector3df(0, 14, -20));
 
+    // TODO: Unit????
     double L = 23;
     double W = 15.2;
     double H = 5;
@@ -319,7 +320,7 @@ int run(char * argv[]){
     //print data
     int frame_number=0;
     FILE * datafile = fopen(file_name ,"w");
-    fprintf(datafile,"frame_number,x,y,theta,v_BR,v_BL,v_FR,v_FL\n");   // CSV FILE SHOULD NOT HAVE SPACE BETWEEN ,
+    fprintf(datafile,"frame_number,posx,posy,posz,q0,qx,qy,qz\n");   // CSV FILE SHOULD NOT HAVE SPACE BETWEEN ,
 
     double time_step = 0.01;
     application.SetTimestep(time_step);
@@ -341,7 +342,7 @@ int run(char * argv[]){
         application.BeginScene(true, true, SColor(255, 140, 161, 192));
 
         application.DrawAll();
-
+        ChIrrTools::drawAllCOGs(mphysicalSystem, application.GetVideoDriver(), 5.0);
         // ADVANCE THE SIMULATION FOR ONE TIMESTEP
         application.DoStep();
 
@@ -366,8 +367,8 @@ int run(char * argv[]){
         // fprintf(datafile,"%d,%f,%f,%f,%f,%f,%f,%f\n",frame_number,
         //     pos.z()-init_pos_z,pos.x()-init_pos_x,theta-init_theta,				//x is the new y, z is the new x
         //     speed_BR,speed_BL,speed_FR,speed_FL);
-        fprintf(datafile,"%d,%f,%f,%f,%f,%f,%f\n",frame_number,
-                    pos.z(),pos.x(), rot.e0(),rot.e1(),rot.e2(),rot.e3());
+        fprintf(datafile,"%d,%f,%f,%f,%f,%f,%f,%f\n",frame_number,
+                    pos.x(), pos.y(), pos.z(), rot.e0(),rot.e1(),rot.e2(),rot.e3());
         
         if (auto mfun = std::dynamic_pointer_cast<ChFunction_Const>(my_link_shaftA->GetSpeedFunction()))
             mfun->Set_yconst(wheel_A_rotspeed);
